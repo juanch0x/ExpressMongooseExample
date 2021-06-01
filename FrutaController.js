@@ -4,9 +4,18 @@ const Fruta = require("./Models/Fruta");
 const router = express.Router();
 
 // get devolver
-router.get("/", async (_, res) => {
+// Para usarlo llamar a /api?tamano={tamano}&peso={peso}
+router.get("/", async (req, res) => {
+  const searchParameters = {};
   try {
-    const frutas = await Fruta.find();
+    const { tamano, peso } = req.query;
+    if (tamano) {
+      searchParameters.tamano = tamano;
+    }
+    if (peso) {
+      searchParameters.peso = peso;
+    }
+    const frutas = await Fruta.find(searchParameters);
     return res.json(frutas);
   } catch (error) {
     return res.status(500).json({
@@ -15,27 +24,37 @@ router.get("/", async (_, res) => {
   }
 });
 
-/*
-router.get("/estacion/:estacion", async (req, res) => {
-  const estacion = req.params.estacion;
-  const frutas = await Fruta.find({ estacion }).exec();
-  // const frutas = await Fruta.find({
-  //   estacion: new RegExp(estacion, "i"),
-  // }).exec();
+router.get("/fruta/:fruta", async (req, res) => {
+  const fruta = req.params.fruta;
+  const frutas = await Fruta.find({
+    nombre: new RegExp(fruta, "i"),
+  }).exec();
   return res.status(200).json(frutas);
 });
-*/
+
+// router.get("/estacion/:estacion", async (req, res) => {
+//   const estacion = req.params.estacion;
+//   const frutas = await Fruta.find({ estacion }).exec();
+//   // const frutas = await Fruta.find({
+//   //   estacion: new RegExp(estacion, "i"),
+//   // }).exec();
+//   return res.status(200).json(frutas);
+// });
 
 // post insertar
 router.post("/", async (req, res) => {
   const nombreFruta = req.body.nombre;
   const colorFruta = req.body.color;
   const estacionFruta = req.body.estacion;
+  const tamanoFruta = req.body.tamano;
+  const pesoFruta = req.body.peso;
 
   const fruta = new Fruta({
     nombre: nombreFruta,
     color: colorFruta,
     estacion: estacionFruta,
+    tamano: tamanoFruta,
+    peso: pesoFruta,
   });
 
   try {
@@ -54,11 +73,15 @@ router.put("/:id", async (req, res) => {
   const nombreFruta = req.body.nombre;
   const colorFruta = req.body.color;
   const estacion = req.body.estacion;
+  const tamano = req.body.tamano;
+  const peso = req.body.peso;
 
   const fruta = await Fruta.findById(id);
   fruta.nombre = nombreFruta ? nombreFruta : fruta.nombre;
   fruta.color = colorFruta ? colorFruta : fruta.color;
   fruta.estacion = estacion ? estacion : fruta.estacion;
+  fruta.tamano = tamano ? tamano : fruta.tamano;
+  fruta.peso = peso ? peso : fruta.peso;
 
   const nuevaFruta = await fruta.save();
 
